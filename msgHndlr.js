@@ -969,6 +969,36 @@ module.exports = msgHandler = async (client, message) => {
                 aruga.reply(from, 'Ada yang Error!', id)
             })
             break
+        case '!ceklokasi':
+            if (quotedMsg.type !== 'location') return aruga.reply(from, `Maaf, format pesan salah.\nKirimkan lokasi dan reply dengan caption ${prefix}ceklokasi`, id)
+            console.log(`Request Status Zona Penyebaran Covid-19 (${quotedMsg.lat}, ${quotedMsg.lng}).`)
+            const zoneStatus = await getLocationData(quotedMsg.lat, quotedMsg.lng)
+            if (zoneStatus.kode !== 200) aruga.sendText(from, 'Maaf, Terjadi error ketika memeriksa lokasi yang anda kirim.')
+            let datax = ''
+            for (let i = 0; i < zoneStatus.data.length; i++) {
+                const { zone, region } = zoneStatus.data[i]
+                const _zone = zone == 'green' ? 'Hijau* (Aman) \n' : zone == 'yellow' ? 'Kuning* (Waspada) \n' : 'Merah* (Bahaya) \n'
+                datax += `${i + 1}. Kel. *${region}* Berstatus *Zona ${_zone}`
+            }
+            const text = `*CEK LOKASI PENYEBARAN COVID-19*\nHasil pemeriksaan dari lokasi yang anda kirim adalah *${zoneStatus.status}* ${zoneStatus.optional}\n\nInformasi lokasi terdampak disekitar anda:\n${datax}`
+            aruga.sendText(from, text)
+            break
+        case '!shortlink':
+            if (args.length == 0) return aruga.reply(from, `ketik ${prefix}shortlink <url>`, id)
+            if (!isUrl(args[0])) return aruga.reply(from, 'Maaf, url yang kamu kirim tidak valid.', id)
+            const shortlink = await urlShortener(args[0])
+            await aruga.sendText(from, shortlink)
+            .catch(() => {
+                aruga.reply(from, 'Ada yang Error!', id)
+            })
+            break
+		case '!bapakfont':
+			if (args.length == 0) return aruga.reply(from, `Mengubah kalimat menjadi alayyyyy\n\nketik ${prefix}bapakfont kalimat`, id)
+			rugaapi.bapakfont(body.slice(11))
+			.then(async(res) => {
+				await aruga.reply(from, `${res}`, id)
+			})
+			break
         case '!help':
             client.sendText(from, help)
             break
