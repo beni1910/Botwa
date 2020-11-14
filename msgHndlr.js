@@ -766,7 +766,7 @@ module.exports = msgHandler = async (client, message) => {
             const { postlink, title, subreddit, url, nsfw, spoiler } = response.data
             client.sendFileFromUrl(from, `${url}`, 'meme.jpg', `${title}`)
             break
-        case 'cekjodoh':
+        case '!cekjodoh':
                 var nonOption = quotedMsg ? quotedMsgObj.body : args.join(' ')
                 if (_.isEmpty(mentionedJidList) != true && mentionedJidList.length >= 2) {
                     const couple1 = await client.getContact(mentionedJidList[0])
@@ -785,7 +785,7 @@ module.exports = msgHandler = async (client, message) => {
                 }
                 insert(author, type, content, pushname, from, argv)
                 break
-      case 'artinama':
+      case '!artinama':
                 var nonOption = quotedMsg ? quotedMsgObj.body : args.join(' ')
                 Primbon('artinama', nonOption)
                     .then(data => {
@@ -796,7 +796,7 @@ module.exports = msgHandler = async (client, message) => {
                     })
                 insert(author, type, content, pushname, from, argv)
                 break
-        case 'translate':
+        case '!translate':
                 var withOption = quotedMsg ? quotedMsgObj.body : args.splice(1).join(' ')
                 Translate(withOption, args[0])
                     .then(data => {
@@ -804,12 +804,147 @@ module.exports = msgHandler = async (client, message) => {
                     })
                 insert(author, type, content, pushname, from, argv)
                 break
-        case 'toxic':
+        case '!toxic':
                 Toxic().then(toxic => {
                     client.sendText(from, toxic)
                 })
                 insert(author, type, content, pushname, from, argv)
                 break
+        case '!surah':
+            if (args.length == 0) return aruga.reply(from, `*_${prefix}surah <nama surah> <ayat>_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahannya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}surah al-baqarah 1\n\n*_${prefix}surah <nama surah> <ayat> en/id_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahannya dalam bahasa Inggris / Indonesia. Contoh penggunaan : ${prefix}surah al-baqarah 1 id`, message.id)
+                var responseh = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah.json')
+                var { data } = responseh.data
+                var idx = data.findIndex(function(post, index) {
+                  if((post.name.transliteration.id.toLowerCase() == args[0].toLowerCase())||(post.name.transliteration.en.toLowerCase() == args[0].toLowerCase()))
+                    return true;
+                });
+                nmr = data[idx].number
+                if(!isNaN(nmr)) {
+                  var responseh2 = await axios.get('https://api.quran.sutanlab.id/surah/'+nmr+"/"+args[1])
+                  var {data} = responseh2.data
+                  var last = function last(array, n) {
+                    if (array == null) return void 0;
+                    if (n == null) return array[array.length - 1];
+                    return array.slice(Math.max(array.length - n, 0));
+                  };
+                  bhs = last(args)
+                  pesan = ""
+                  pesan = pesan + data.text.arab + "\n\n"
+                  if(bhs == "en") {
+                    pesan = pesan + data.translation.en
+                  } else {
+                    pesan = pesan + data.translation.id
+                  }
+                  pesan = pesan + "\n\n(Q.S. "+data.surah.name.transliteration.id+":"+args[1]+")"
+                  aruga.reply(from, pesan, message.id)
+                }
+              break
+        case '!tafsir':
+            if (args.length == 0) return aruga.reply(from, `*_${prefix}tafsir <nama surah> <ayat>_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahan dan tafsirnya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}tafsir al-baqarah 1`, message.id)
+                var responsh = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah.json')
+                var {data} = responsh.data
+                var idx = data.findIndex(function(post, index) {
+                  if((post.name.transliteration.id.toLowerCase() == args[0].toLowerCase())||(post.name.transliteration.en.toLowerCase() == args[0].toLowerCase()))
+                    return true;
+                });
+                nmr = data[idx].number
+                if(!isNaN(nmr)) {
+                  var responsih = await axios.get('https://api.quran.sutanlab.id/surah/'+nmr+"/"+args[1])
+                  var {data} = responsih.data
+                  pesan = ""
+                  pesan = pesan + "Tafsir Q.S. "+data.surah.name.transliteration.id+":"+args[1]+"\n\n"
+                  pesan = pesan + data.text.arab + "\n\n"
+                  pesan = pesan + "_" + data.translation.id + "_" + "\n\n" +data.tafsir.id.long
+                  aruga.reply(from, pesan, message.id)
+              }
+              break
+        case '!alaudio':
+            if (args.length == 0) return aruga.reply(from, `*_${prefix}ALaudio <nama surah>_*\nMenampilkan tautan dari audio surah tertentu. Contoh penggunaan : ${prefix}ALaudio al-fatihah\n\n*_${prefix}ALaudio <nama surah> <ayat>_*\nMengirim audio surah dan ayat tertentu beserta terjemahannya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}ALaudio al-fatihah 1\n\n*_${prefix}ALaudio <nama surah> <ayat> en_*\nMengirim audio surah dan ayat tertentu beserta terjemahannya dalam bahasa Inggris. Contoh penggunaan : ${prefix}ALaudio al-fatihah 1 en`, message.id)
+              ayat = "ayat"
+              bhs = ""
+                var responseh = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah.json')
+                var surah = responseh.data
+                var idx = surah.data.findIndex(function(post, index) {
+                  if((post.name.transliteration.id.toLowerCase() == args[0].toLowerCase())||(post.name.transliteration.en.toLowerCase() == args[0].toLowerCase()))
+                    return true;
+                });
+                nmr = surah.data[idx].number
+                if(!isNaN(nmr)) {
+                  if(args.length > 2) {
+                    ayat = args[1]
+                  }
+                  if (args.length == 2) {
+                    var last = function last(array, n) {
+                      if (array == null) return void 0;
+                      if (n == null) return array[array.length - 1];
+                      return array.slice(Math.max(array.length - n, 0));
+                    };
+                    ayat = last(args)
+                  } 
+                  pesan = ""
+                  if(isNaN(ayat)) {
+                    var responsih2 = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah/'+nmr+'.json')
+                    var {name, name_translations, number_of_ayah, number_of_surah,  recitations} = responsih2.data
+                    pesan = pesan + "Audio Quran Surah ke-"+number_of_surah+" "+name+" ("+name_translations.ar+") "+ "dengan jumlah "+ number_of_ayah+" ayat\n"
+                    pesan = pesan + "Dilantunkan oleh "+recitations[0].name+" : "+recitations[0].audio_url+"\n"
+                    pesan = pesan + "Dilantunkan oleh "+recitations[1].name+" : "+recitations[1].audio_url+"\n"
+                    pesan = pesan + "Dilantunkan oleh "+recitations[2].name+" : "+recitations[2].audio_url+"\n"
+                    aruga.reply(from, pesan, message.id)
+                  } else {
+                    var responsih2 = await axios.get('https://api.quran.sutanlab.id/surah/'+nmr+"/"+ayat)
+                    var {data} = responsih2.data
+                    var last = function last(array, n) {
+                      if (array == null) return void 0;
+                      if (n == null) return array[array.length - 1];
+                      return array.slice(Math.max(array.length - n, 0));
+                    };
+                    bhs = last(args)
+                    pesan = ""
+                    pesan = pesan + data.text.arab + "\n\n"
+                    if(bhs == "en") {
+                      pesan = pesan + data.translation.en
+                    } else {
+                      pesan = pesan + data.translation.id
+                    }
+                    pesan = pesan + "\n\n(Q.S. "+data.surah.name.transliteration.id+":"+args[1]+")"
+                    await aruga.sendFileFromUrl(from, data.audio.secondary[0])
+                    await aruga.reply(from, pesan, message.id)
+                  }
+              }
+              break
+        case '!resep':
+            if (args.length == 0) return aruga.reply(from, `Untuk mencari resep makanan\nCaranya ketik: ${prefix}resep [search]\n\ncontoh: ${prefix}resep tahu`, id)
+            const cariresep = body.slice(7)
+            const hasilresep = await resep.resep(cariresep)
+            await aruga.reply(from, hasilresep + '\n\nIni kak resep makanannya..', id)
+            .catch(() => {
+                aruga.reply(from, 'Ada yang Error!', id)
+            })
+            break
+        case '!pantun':
+            fetch('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/random/pantun.txt')
+            .then(res => res.text())
+            .then(body => {
+                let splitpantun = body.split('\n')
+                let randompantun = splitpantun[Math.floor(Math.random() * splitpantun.length)]
+                aruga.reply(from, randompantun.replace(/aruga-line/g,"\n"), id)
+            })
+            .catch(() => {
+                aruga.reply(from, 'Ada yang Error!', id)
+            })
+            break
+        case '!katabijak':
+            fetch('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/random/katabijax.txt')
+            .then(res => res.text())
+            .then(body => {
+                let splitbijak = body.split('\n')
+                let randombijak = splitbijak[Math.floor(Math.random() * splitbijak.length)]
+                aruga.reply(from, randombijak, id)
+            })
+            .catch(() => {
+                aruga.reply(from, 'Ada yang Error!', id)
+            })
+            break
         case '!help':
             client.sendText(from, help)
             break
