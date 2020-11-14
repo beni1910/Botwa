@@ -766,6 +766,50 @@ module.exports = msgHandler = async (client, message) => {
             const { postlink, title, subreddit, url, nsfw, spoiler } = response.data
             client.sendFileFromUrl(from, `${url}`, 'meme.jpg', `${title}`)
             break
+        case 'cekjodoh':
+                var nonOption = quotedMsg ? quotedMsgObj.body : args.join(' ')
+                if (_.isEmpty(mentionedJidList) != true && mentionedJidList.length >= 2) {
+                    const couple1 = await client.getContact(mentionedJidList[0])
+                    const couple2 = await client.getContact(mentionedJidList[1])
+                    const c1 = couple1.isBusiness ? couple1.verifiedName : couple1.pushname
+                    const c2 = couple2.isBusiness ? couple2.verifiedName : couple2.pushname
+                    Primbon('cekjodoh', `${c1}&${c2}`)
+                        .then(data => {
+                            client.reply(from, data, id)
+                        })
+                } else if (nonOption.split('').some(dt => /\W/g.test(dt))) {
+                    Primbon('cekjodoh', nonOption)
+                        .then(data => {
+                            client.reply(from, data, id)
+                        })
+                }
+                insert(author, type, content, pushname, from, argv)
+                break
+      case 'artinama':
+                var nonOption = quotedMsg ? quotedMsgObj.body : args.join(' ')
+                Primbon('artinama', nonOption)
+                    .then(data => {
+                        client.reply(from, `arti nama: *${nonOption}*\n\n${data}`, id)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+                insert(author, type, content, pushname, from, argv)
+                break
+        case 'translate':
+                var withOption = quotedMsg ? quotedMsgObj.body : args.splice(1).join(' ')
+                Translate(withOption, args[0])
+                    .then(data => {
+                        client.reply(from, data, id)
+                    })
+                insert(author, type, content, pushname, from, argv)
+                break
+        case 'toxic':
+                Toxic().then(toxic => {
+                    client.sendText(from, toxic)
+                })
+                insert(author, type, content, pushname, from, argv)
+                break
         case '!help':
             client.sendText(from, help)
             break
