@@ -13,6 +13,7 @@ const color = require('./lib/color')
 const { spawn, exec } = require('child_process')
 const nhentai = require('nhentai-js')
 const { API } = require('nhentai-api')
+const {api, getLocationData, resep, urlShortener, translate } = require('./lib')
 const { liriklagu, quotemaker, randomNimek, fb, sleep, jadwalTv, ss } = require('./lib/functions')
 const { help, snk, info, donate, readme, listChannel } = require('./lib/help')
 const { stdout } = require('process')
@@ -821,6 +822,35 @@ module.exports = msgHandler = async (client, message) => {
                   aruga.reply(from, pesan, message.id)
               }
               break
+	case 'surah':
+            if (args.length == 0) return aruga.reply(from, `*_${prefix}surah <nama surah> <ayat>_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahannya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}surah al-baqarah 1\n\n*_${prefix}surah <nama surah> <ayat> en/id_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahannya dalam bahasa Inggris / Indonesia. Contoh penggunaan : ${prefix}surah al-baqarah 1 id`, message.id)
+                var responseh = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah.json')
+                var { data } = responseh.data
+                var idx = data.findIndex(function(post, index) {
+                  if((post.name.transliteration.id.toLowerCase() == args[0].toLowerCase())||(post.name.transliteration.en.toLowerCase() == args[0].toLowerCase()))
+                    return true;
+                });
+                nmr = data[idx].number
+                if(!isNaN(nmr)) {
+                  var responseh2 = await axios.get('https://api.quran.sutanlab.id/surah/'+nmr+"/"+args[1])
+                  var {data} = responseh2.data
+                  var last = function last(array, n) {
+                    if (array == null) return void 0;
+                    if (n == null) return array[array.length - 1];
+                    return array.slice(Math.max(array.length - n, 0));
+                  };
+                  bhs = last(args)
+                  pesan = ""
+                  pesan = pesan + data.text.arab + "\n\n"
+                  if(bhs == "en") {
+                    pesan = pesan + data.translation.en
+                  } else {
+                    pesan = pesan + data.translation.id
+                  }
+                  pesan = pesan + "\n\n(Q.S. "+data.surah.name.transliteration.id+":"+args[1]+")"
+                  aruga.reply(from, pesan, message.id)
+                }
+              break
         case '!alaudio':
             if (args.length == 0) return aruga.reply(from, `*_${prefix}ALaudio <nama surah>_*\nMenampilkan tautan dari audio surah tertentu. Contoh penggunaan : ${prefix}ALaudio al-fatihah\n\n*_${prefix}ALaudio <nama surah> <ayat>_*\nMengirim audio surah dan ayat tertentu beserta terjemahannya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}ALaudio al-fatihah 1\n\n*_${prefix}ALaudio <nama surah> <ayat> en_*\nMengirim audio surah dan ayat tertentu beserta terjemahannya dalam bahasa Inggris. Contoh penggunaan : ${prefix}ALaudio al-fatihah 1 en`, message.id)
               ayat = "ayat"
@@ -932,9 +962,38 @@ module.exports = msgHandler = async (client, message) => {
                 aruga.reply(from, 'Ada yang Error!', id)
             })
             break
+	case 'translate':
+            if (args.length != 1) return aruga.reply(from, `Maaf, format pesan salah.\nSilahkan reply sebuah pesan dengan caption ${prefix}translate <kode_bahasa>\ncontoh ${prefix}translate id`, id)
+            if (!quotedMsg) return aruga.reply(from, `Maaf, format pesan salah.\nSilahkan reply sebuah pesan dengan caption ${prefix}translate <kode_bahasa>\ncontoh ${prefix}translate id`, id)
+            const quoteText = quotedMsg.type == 'chat' ? quotedMsg.body : quotedMsg.type == 'image' ? quotedMsg.caption : ''
+            translate(quoteText, args[0])
+                .then((result) => aruga.sendText(from, result))
+                .catch(() => aruga.sendText(from, 'Error, Kode bahasa salah.'))
+            break
+	case 'ceklokasi':
+            if (quotedMsg.type !== 'location') return aruga.reply(from, `Maaf, format pesan salah.\nKirimkan lokasi dan reply dengan caption ${prefix}ceklokasi`, id)
+            console.log(`Request Status Zona Penyebaran Covid-19 (${quotedMsg.lat}, ${quotedMsg.lng}).`)
+            const zoneStatus = await getLocationData(quotedMsg.lat, quotedMsg.lng)
+            if (zoneStatus.kode !== 200) aruga.sendText(from, 'Maaf, Terjadi error ketika memeriksa lokasi yang anda kirim.')
+            let datax = ''
+            for (let i = 0; i < zoneStatus.data.length; i++) {
+                const { zone, region } = zoneStatus.data[i]
+                const _zone = zone == 'green' ? 'Hijau* (Aman) \n' : zone == 'yellow' ? 'Kuning* (Waspada) \n' : 'Merah* (Bahaya) \n'
+                datax += `${i + 1}. Kel. *${region}* Berstatus *Zona ${_zone}`
+            }
+            const text = `*CEK LOKASI PENYEBARAN COVID-19*\nHasil pemeriksaan dari lokasi yang anda kirim adalah *${zoneStatus.status}* ${zoneStatus.optional}\n\nInformasi lokasi terdampak disekitar anda:\n${datax}`
+            aruga.sendText(from, text)
+            break
 	case 'covidindo':
 			rugaapi.covidindo()
 			.then(async (res) => {
+				await aruga.reply(from, `${res}`, id)
+			})
+			break
+	case 'bapakfont':
+			if (args.length == 0) return aruga.reply(from, `Mengubah kalimat menjadi alayyyyy\n\nketik ${prefix}bapakfont kalimat`, id)
+			rugaapi.bapakfont(body.slice(11))
+			.then(async(res) => {
 				await aruga.reply(from, `${res}`, id)
 			})
 			break
