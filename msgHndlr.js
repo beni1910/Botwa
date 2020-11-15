@@ -875,15 +875,6 @@ module.exports = msgHandler = async (client, message) => {
                   }
               }
               break
-        case '!resep':
-            if (args.length == 0) return aruga.reply(from, `Untuk mencari resep makanan\nCaranya ketik: ${prefix}resep [search]\n\ncontoh: ${prefix}resep tahu`, id)
-            const cariresep = body.slice(7)
-            const hasilresep = await resep.resep(cariresep)
-            await aruga.reply(from, hasilresep + '\n\nIni kak resep makanannya..', id)
-            .catch(() => {
-                aruga.reply(from, 'Ada yang Error!', id)
-            })
-            break
         case '!pantun':
             fetch('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/random/pantun.txt')
             .then(res => res.text())
@@ -931,20 +922,6 @@ module.exports = msgHandler = async (client, message) => {
             .catch(() => {
                 aruga.reply(from, 'Ada yang Error!', id)
             })
-            break
-        case '!ceklokasi':
-            if (quotedMsg.type !== 'location') return aruga.reply(from, `Maaf, format pesan salah.\nKirimkan lokasi dan reply dengan caption ${prefix}ceklokasi`, id)
-            console.log(`Request Status Zona Penyebaran Covid-19 (${quotedMsg.lat}, ${quotedMsg.lng}).`)
-            const zoneStatus = await getLocationData(quotedMsg.lat, quotedMsg.lng)
-            if (zoneStatus.kode !== 200) aruga.sendText(from, 'Maaf, Terjadi error ketika memeriksa lokasi yang anda kirim.')
-            let datax = ''
-            for (let i = 0; i < zoneStatus.data.length; i++) {
-                const { zone, region } = zoneStatus.data[i]
-                const _zone = zone == 'green' ? 'Hijau* (Aman) \n' : zone == 'yellow' ? 'Kuning* (Waspada) \n' : 'Merah* (Bahaya) \n'
-                datax += `${i + 1}. Kel. *${region}* Berstatus *Zona ${_zone}`
-            }
-            const text = `*CEK LOKASI PENYEBARAN COVID-19*\nHasil pemeriksaan dari lokasi yang anda kirim adalah *${zoneStatus.status}* ${zoneStatus.optional}\n\nInformasi lokasi terdampak disekitar anda:\n${datax}`
-            aruga.sendText(from, text)
             break
         case '!shortlink':
             if (args.length == 0) return aruga.reply(from, `ketik ${prefix}shortlink <url>`, id)
