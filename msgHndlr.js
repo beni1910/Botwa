@@ -797,12 +797,6 @@ module.exports = msgHandler = async (client, message) => {
                     })
                 insert(author, type, content, pushname, from, argv)
                 break
-        case '!toxic':
-                Toxic().then(toxic => {
-                    client.sendText(from, toxic)
-                })
-                insert(author, type, content, pushname, from, argv)
-                break
         case '!tafsir':
             if (args.length == 0) return aruga.reply(from, `*_${prefix}tafsir <nama surah> <ayat>_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahan dan tafsirnya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}tafsir al-baqarah 1`, message.id)
                 var responsh = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah.json')
