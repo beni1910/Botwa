@@ -323,6 +323,30 @@ module.exports = msgHandler = async (client, message) => {
             const res_animek = `Title: *${animek.title}*\n\n${animek.info}\n\nSinopsis: ${animek.sinopsis}\n\nLink Download:\n${animek.link_dl}`
             client.sendFileFromUrl(from, animek.thumb, 'kusonime.jpg', res_animek, id)
             break
+        case 'kpop':
+            if (args.length == 0) return aruga.reply(from, `Untuk menggunakan ${prefix}kpop\nSilahkan ketik: ${prefix}kpop [query]\nContoh: ${prefix}kpop bts\n\nquery yang tersedia:\nblackpink, exo, bts`, id)
+            if (args[0] == 'blackpink' || args[0] == 'exo' || args[0] == 'bts') {
+                fetch('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/random/kpop/' + args[0] + '.txt')
+                .then(res => res.text())
+                .then(body => {
+                    let randomkpop = body.split('\n')
+                    let randomkpopx = randomkpop[Math.floor(Math.random() * randomkpop.length)]
+                    aruga.sendFileFromUrl(from, randomkpopx, '', 'Nee..', id)
+                })
+                .catch(() => {
+                    aruga.reply(from, 'Ada yang Error!', id)
+                })
+            } else {
+                aruga.reply(from, `Maaf query tidak tersedia. Silahkan ketik ${prefix}kpop untuk melihat list query`)
+            }
+            break
+        case 'memes':
+            const randmeme = await meme.random()
+            aruga.sendFileFromUrl(from, randmeme, '', '', id)
+            .catch(() => {
+                aruga.reply(from, 'Ada yang Error!', id)
+            })
+            break
         case '!nh':
             //if (isGroupMsg) return client.reply(from, 'Sorry this command for private chat only!', id)
             if (args.length === 2) {
