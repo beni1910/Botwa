@@ -17,7 +17,7 @@
 ## Clone this project
 
 ```bash
-> git clone https://github.com/beni1910/Botwa
+> npm install
 ```
 
 ## Install the dependencies:
@@ -25,8 +25,7 @@ Before running the below command, make sure you're in the project directory that
 you've just cloned!!
 
 ```bash
-> npm install gify-cli -g
-> npm i
+> git clone https://github.com/beni1910/Botwa
 ```
 
 ### Usage
