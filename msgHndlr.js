@@ -485,7 +485,7 @@ module.exports = msgHandler = async (client, message) => {
                 hehe += '╠➥'
                 hehe += ` @${groupMem[i].id.replace(/@c.us/g, '')}\n`
             }
-            hehe += '╚═〘 Shinomiya Kaguya BOT 〙'
+            hehe += '╚═〘 BOT_STYLE 〙'
             await client.sendTextWithMentions(from, hehe)
             break
         case '!kickall':
