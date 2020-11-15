@@ -797,20 +797,20 @@ module.exports = msgHandler = async (client, message) => {
                 insert(author, type, content, pushname, from, argv)
                 break
         case '!translate':
-                var withOption = quotedMsg ? quotedMsgObj.body : args.splice(1).join(' ')
-                Translate(withOption, args[0])
-                    .then(data => {
-                        client.reply(from, data, id)
-                    })
-                insert(author, type, content, pushname, from, argv)
-                break
+            if (args.length != 1) return aruga.reply(from, `Maaf, format pesan salah.\nSilahkan reply sebuah pesan dengan caption ${prefix}translate <kode_bahasa>\ncontoh ${prefix}translate id`, id)
+            if (!quotedMsg) return aruga.reply(from, `Maaf, format pesan salah.\nSilahkan reply sebuah pesan dengan caption ${prefix}translate <kode_bahasa>\ncontoh ${prefix}translate id`, id)
+            const quoteText = quotedMsg.type == 'chat' ? quotedMsg.body : quotedMsg.type == 'image' ? quotedMsg.caption : ''
+            translate(quoteText, args[0])
+                .then((result) => aruga.sendText(from, result))
+                .catch(() => aruga.sendText(from, 'Error, Kode bahasa salah.'))
+		break
         case '!toxic':
                 Toxic().then(toxic => {
                     client.sendText(from, toxic)
                 })
                 insert(author, type, content, pushname, from, argv)
                 break
-        case '!surah':
+        case 'surah':
             if (args.length == 0) return aruga.reply(from, `*_${prefix}surah <nama surah> <ayat>_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahannya dalam bahasa Indonesia. Contoh penggunaan : ${prefix}surah al-baqarah 1\n\n*_${prefix}surah <nama surah> <ayat> en/id_*\nMenampilkan ayat Al-Quran tertentu beserta terjemahannya dalam bahasa Inggris / Indonesia. Contoh penggunaan : ${prefix}surah al-baqarah 1 id`, message.id)
                 var responseh = await axios.get('https://raw.githubusercontent.com/ArugaZ/grabbed-results/main/islam/surah.json')
                 var { data } = responseh.data
@@ -996,6 +996,12 @@ module.exports = msgHandler = async (client, message) => {
 			if (args.length == 0) return aruga.reply(from, `Mengubah kalimat menjadi alayyyyy\n\nketik ${prefix}bapakfont kalimat`, id)
 			rugaapi.bapakfont(body.slice(11))
 			.then(async(res) => {
+				await aruga.reply(from, `${res}`, id)
+			})
+			break
+	case 'covidindo':
+			rugaapi.covidindo()
+			.then(async (res) => {
 				await aruga.reply(from, `${res}`, id)
 			})
 			break
